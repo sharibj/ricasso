@@ -42,26 +42,14 @@ Return composable values until the user needs a final answer.
 
 ---
 
-## Current Status
+## Steps
 
-- Read up on dagger core concepts
-- Create a Docker file with pi agentic harness
-- Connected it to local ollama qwen
-- Created ricasso java module and prompt function
-- Explored multiple ways to initialise function container image
-- **Mount in dagger is one way**
+### Install
+`dagger install https://github.com/sharibj/ricasso.git`
 
+### Run
+`dagger shell`
 
-```
- ▶ ✔ c=$(prompt . "write a haiku about love to love.md") 0.0s
-  ▶ ✔ $c |
-  file /app/love.md |
-  contents 0.0s
-Whispers of the breeze                                                                                                                                 
-Stars dance in the night's embrace                                                                                                                     
-Love blooms without end                                                                                                                        ```
+`c=$(ricasso | init .)`
 
-`init . | task "what is the capital of france" | output | export ./output`
-
-`pi install npm:pi-web-access`
-
+`$c | task "what is the current project in your working directory about?" | container | stdout`
