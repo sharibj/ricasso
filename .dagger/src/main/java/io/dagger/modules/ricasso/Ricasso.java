@@ -5,6 +5,7 @@ import static io.dagger.client.Dagger.dag;
 import io.dagger.client.Container;
 import io.dagger.client.Directory;
 import io.dagger.client.Env;
+import io.dagger.client.LLM;
 import io.dagger.module.annotation.Function;
 import io.dagger.module.annotation.Object;
 
@@ -56,22 +57,39 @@ public class Ricasso {
   }
 
   @Function
-  public String ask(String prompt) throws InterruptedException, ExecutionException, DaggerQueryException{
+  public Ricasso ask(String prompt) throws InterruptedException, ExecutionException, DaggerQueryException{
     Env env = dag()
-        .env();
-    return dag()
+        .env()
+        .withCurrentModule()
+        .withStringInput("workdir", WORKING_DIR, "path to the working directory")
+        .withContainerInput("base", this.container, "a base container to use")
+        .withContainerOutput("result", "the updated container");
+    LLM llm = dag()
         .llm()
         .withEnv(env)
-        .withPrompt(prompt)
-        .loop()
-        .lastReply();
+        .withPrompt("""
+          You are a coding agent working inside the container $base.
+
+          Perform the requested task by modifying files inside $base under the working directory $workdir.
+          When creating or editing files, use the container's filesystem operations.
+          Do not declare individual files as outputs.
+          When the task is complete, return the modified $base container
+          using the declared output named `result`.
+
+          User request:
+          %s
+          """.formatted(prompt));
+        // .loop();
+    this.container = llm.env().output("result").asContainer();
+    return this;
   }
 
 
   private Ricasso append_and_execute(List<String> command, String postfix) {
      List<String> execCommand = new ArrayList<>(command);
     execCommand.add(postfix);
-    this.container = this.container
+    this.container = this
+    .container
     .withExec(execCommand);
     return this;
   }
