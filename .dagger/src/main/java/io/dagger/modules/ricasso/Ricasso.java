@@ -17,6 +17,7 @@ public class Ricasso {
   public Container container;
   private static final  List<String> HARNESS_EXEC = List.of("pi", "-p");
   private static final String WORKING_DIR = "/app";
+  private static final String RUNTIME_DIR = "./runtime";
 
   public Ricasso() {
     this.container = dag().container();
@@ -24,11 +25,10 @@ public class Ricasso {
 
   @Function(description="Initialise the container with source directory.")
   public Ricasso init(Directory directoryArg){
-    this.container = directoryArg.dockerBuild()
+    this.container = directoryArg.directory(RUNTIME_DIR).dockerBuild()
     .withMountedDirectory(WORKING_DIR, directoryArg)
     .withWorkdir(WORKING_DIR);
     return this;
-
   }
 
   /** Returns a container that prompts to pi */

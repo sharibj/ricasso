@@ -51,4 +51,4 @@ Whispers of the breeze
 Stars dance in the night's embrace                                                                                                                     
 Love blooms without end                                                                                                                        ```
 
-`init . | task "what is the capital of paris" | output | export ./output`
+`init . | task "what is the capital of france" | output | export ./output`
