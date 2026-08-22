@@ -50,6 +50,11 @@
             <version>2.5.2</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>1.54.0</version>
+        </dependency>
     </dependencies>
 
     <build>
