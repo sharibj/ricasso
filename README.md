@@ -78,3 +78,36 @@ Hello, Jeff! How can I assist you today? If you have any questions or need help 
 You are Jeff! 😊 How can I assist you today? If you have any questions or need help with something, feel free to let me know!
 
 ```
+
+<!-- Initialise -->
+init_c=$(ricasso | init .)
+
+<!-- Copy to self reference later -->
+context=$init_c
+
+<!-- Start a new task -->
+context=$($context | task "gather all context for this project")
+
+<!-- Trigger lazy execution -->
+$context | container | combined-output
+
+<!-- Start a followup tas -->
+context=$($context | followup "the project is in the current directory. go through it to gather any and all required context")
+
+<!-- Trigger lazy execution again-->
+$context | container | combined-output
+
+
+----
+
+
+
+init_c=$(dagger -c 'init_c=$(init .)')
+context=$init_c
+
+context=$(dagger -c "${context} | task \"gather all context for this project\"")
+
+
+
+run_tests=$($run_tests | followup "run all tests")
+$run_tests | container | combined-output

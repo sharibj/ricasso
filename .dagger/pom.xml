@@ -12,7 +12,7 @@
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dagger.module.deps>1.0.0-beta.10-ricasso-module</dagger.module.deps>
+        <dagger.module.deps>0.21.4-ricasso-module</dagger.module.deps>
     </properties>
 
     <dependencies>
@@ -49,11 +49,6 @@
             <artifactId>json-smart</artifactId>
             <version>2.5.2</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>1.54.0</version>
         </dependency>
     </dependencies>
 

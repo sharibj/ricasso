@@ -4,11 +4,14 @@ import static io.dagger.client.Dagger.dag;
 
 import io.dagger.client.Container;
 import io.dagger.client.Directory;
+import io.dagger.client.Env;
 import io.dagger.module.annotation.Function;
 import io.dagger.module.annotation.Object;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import io.dagger.client.exception.DaggerQueryException;
 
 /** Ricasso main object */
 @Object
@@ -51,6 +54,19 @@ public class Ricasso {
   public Directory output() {
     return this.container.directory(WORKING_DIR);
   }
+
+  @Function
+  public String ask(String prompt) throws InterruptedException, ExecutionException, DaggerQueryException{
+    Env env = dag()
+        .env();
+    return dag()
+        .llm()
+        .withEnv(env)
+        .withPrompt(prompt)
+        .loop()
+        .lastReply();
+  }
+
 
   private Ricasso append_and_execute(List<String> command, String postfix) {
      List<String> execCommand = new ArrayList<>(command);
