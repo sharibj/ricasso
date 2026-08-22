@@ -30,6 +30,16 @@ An SDLC automation using Dagger
 > They're units of computation that accept inputs, perform operations (typically in containers), and return outputs.
 > Functions can be combined together to create complex workflows.
 
+
+### Lazy Work
+Dagger can describe work before it runs it.
+
+A function can return a Container, Directory, File, service, object, or changeset. That value can keep flowing through the graph.
+
+Dagger runs work when the caller needs a concrete result: a string, exported file, synced container, applied changeset, live service, or check status.
+
+Return composable values until the user needs a final answer.
+
 ---
 
 ## Current Status
@@ -52,3 +62,6 @@ Stars dance in the night's embrace
 Love blooms without end                                                                                                                        ```
 
 `init . | task "what is the capital of france" | output | export ./output`
+
+`pi install npm:pi-web-access`
+

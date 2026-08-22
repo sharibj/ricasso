@@ -17,7 +17,6 @@ public class Ricasso {
   public Container container;
   private static final  List<String> HARNESS_EXEC = List.of("pi", "-p");
   private static final String WORKING_DIR = "/app";
-  private static final String RUNTIME_DIR = "./runtime";
 
   public Ricasso() {
     this.container = dag().container();
@@ -25,13 +24,12 @@ public class Ricasso {
 
   @Function(description="Initialise the container with source directory.")
   public Ricasso init(Directory directoryArg){
-    this.container = directoryArg.directory(RUNTIME_DIR).dockerBuild()
+    this.container = dag().container().from("jafarisharib/pi-harness")
     .withMountedDirectory(WORKING_DIR, directoryArg)
     .withWorkdir(WORKING_DIR);
     return this;
   }
 
-  /** Returns a container that prompts to pi */
   @Function(description="Assign a task to the agentic harness.")
   public Ricasso task(String prompt){
     List<String> execCommand = new ArrayList<>(HARNESS_EXEC);
@@ -39,6 +37,11 @@ public class Ricasso {
     this.container = this.container
     .withExec(execCommand);
     return this;
+  }
+
+  @Function(description = "Return underlying container.")
+  public Container container() {
+    return this.container;
   }
 
   @Function(description = "Return the modified source directory.")

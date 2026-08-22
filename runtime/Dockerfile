@@ -31,6 +31,10 @@
    # Set working directory    
    WORKDIR /app
 
+   # Setup pi    
+   RUN pi install npm:pi-web-access
+   RUN pi install npm:pi-subagents
+
    # Run the Pi agent with Ollama configuration
    CMD ["pi", "-p", "Write a haiku.md with a small haiku about midnight"]
 
