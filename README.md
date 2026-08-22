@@ -40,3 +40,15 @@ An SDLC automation using Dagger
 - Created ricasso java module and prompt function
 - Explored multiple ways to initialise function container image
 - **Mount in dagger is one way**
+
+
+```
+ ▶ ✔ c=$(prompt . "write a haiku about love to love.md") 0.0s
+  ▶ ✔ $c |
+  file /app/love.md |
+  contents 0.0s
+Whispers of the breeze                                                                                                                                 
+Stars dance in the night's embrace                                                                                                                     
+Love blooms without end                                                                                                                        ```
+
+`init . | task "what is the capital of paris" | output | export ./output`
