@@ -15,8 +15,8 @@ import java.util.List;
 public class Ricasso {
 
   public Container container;
-  private static final  List<String> HARNESS_EXEC = List.of("pi", "-p");
-  private static final  List<String> HARNESS_CONTINUE = List.of("pi", "-p", "--continue");
+  private static final  List<String> HARNESS_EXEC = List.of("pi", "-a", "-p");
+  private static final  List<String> HARNESS_CONTINUE = List.of("pi", "-a", "-p", "--continue");
   private static final String WORKING_DIR = "/app";
 
   public Ricasso() {

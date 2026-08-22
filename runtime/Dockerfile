@@ -25,6 +25,7 @@
 
    # Copy your models.json file into the container
    COPY models.json /root/.pi/agent/models.json
+   COPY APPEND_SYSTEM.md ~/.pi/agent/APPEND_SYSTEM.md
 
    # Expose the Pi agent's default port (if needed)
    EXPOSE 8000
