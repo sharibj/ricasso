@@ -16,6 +16,7 @@ public class Ricasso {
 
   public Container container;
   private static final  List<String> HARNESS_EXEC = List.of("pi", "-p");
+  private static final  List<String> HARNESS_CONTINUE = List.of("pi", "-p", "--continue");
   private static final String WORKING_DIR = "/app";
 
   public Ricasso() {
@@ -30,13 +31,15 @@ public class Ricasso {
     return this;
   }
 
-  @Function(description="Assign a task to the agentic harness.")
+  @Function(description="Assign a new task to the agentic harness.")
   public Ricasso task(String prompt){
-    List<String> execCommand = new ArrayList<>(HARNESS_EXEC);
-    execCommand.add(prompt);
-    this.container = this.container
-    .withExec(execCommand);
-    return this;
+    return append_and_execute(HARNESS_EXEC, prompt);
+  }
+
+
+  @Function(description="Continue a previous task in the agentic harness.")
+  public Ricasso followup(String prompt){
+    return append_and_execute(HARNESS_CONTINUE, prompt);
   }
 
   @Function(description = "Return underlying container.")
@@ -47,5 +50,13 @@ public class Ricasso {
   @Function(description = "Return the modified source directory.")
   public Directory output() {
     return this.container.directory(WORKING_DIR);
+  }
+
+  private Ricasso append_and_execute(List<String> command, String postfix) {
+     List<String> execCommand = new ArrayList<>(command);
+    execCommand.add(postfix);
+    this.container = this.container
+    .withExec(execCommand);
+    return this;
   }
 }

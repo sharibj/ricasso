@@ -52,4 +52,29 @@ Return composable values until the user needs a final answer.
 
 `c=$(ricasso | init .)`
 
-`$c | task "what is the current project in your working directory about?" | container | stdout`
+`$c | task "what is the current project in your working directory about?" | container | combined-output`
+
+```
+[dagger x-release] running dagger from v1.0.0-beta.10; using release v1.0.0-beta.10
+▶ ✔ connect 0.2s
+▶ ✔ detect module: . 1.2s
+  ▶ ✔ init_c=$(init .) 0.2s
+  ● ✔ intro=$($init_c | task "I am Sharib") 0.0s
+  ▶ ✔ $intro | container | combined-output 34.5s
+Hello, Sharib! Welcome. How can I assist you today? 😊
+  ● ✔ intro=$($init_c | task "I am Sharib") 0.0s
+  ● ✔ intro=$($intro | followup "who am I") 0.0s
+  ▶ ✔ $intro | container | combined-output 5.8s
+You are Sharib! 😊 How can I assist you today?
+  ● ✔ weather=$($intro | task "who am I") 0.0s
+  ▶ ✔ $weather | container | combined-output 11.6s
+I don't have access to your personal information or account details. If you're asking about your identity in the context of using this system, you would need to check your account settings or login information if
+ou're logged into a service. Would you like help with something else?
+  ● ✔ weather=$($weather | task "I am jeff") 0.0s
+  ▶ ✔ $weather | container | combined-output 6.4s
+Hello, Jeff! How can I assist you today? If you have any questions or need help with something, feel free to let me know! 😊
+  ● ✔ weather=$($weather | followup "who am I") 0.0s
+  ▶ ✔ $weather | container | combined-output 6.5s
+You are Jeff! 😊 How can I assist you today? If you have any questions or need help with something, feel free to let me know!
+
+```
