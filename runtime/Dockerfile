@@ -6,6 +6,7 @@
        curl \
        wget \
        gnupg \
+       git \
        xterm \
        && rm -rf /var/lib/apt/lists/*
 
