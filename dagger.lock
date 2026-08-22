@@ -1,0 +1,3 @@
+[["version","2"]]
+["","git.ref",["https://github.com/dagger/dagger","refs/tags/v1.0.0-beta.10"],{"ref":"refs/tags/v1.0.0-beta.10","sha":"0e19eba6d38d7fd7e9781a1a3df5fc37208d252a"}]
+["","git.ref",["https://github.com/dagger/java-sdk","HEAD"],{"ref":"refs/heads/main","sha":"8d0abd31391ad774c3370b5bf2289a59abb8d7e4"}]

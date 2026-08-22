@@ -1,8 +1,0 @@
-{
-  "name": "ricasso",
-  "engineVersion": "v0.21.8",
-  "sdk": {
-    "source": "java"
-  },
-  "source": ".dagger"
-}
