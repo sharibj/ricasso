@@ -99,3 +99,15 @@ $context | container | combined-output
 
 
 ----
+
+
+
+init_c=$(dagger -c 'init_c=$(init .)')
+context=$init_c
+
+context=$(dagger -c "${context} | task \"gather all context for this project\"")
+
+
+
+run_tests=$($run_tests | followup "run all tests")
+$run_tests | container | combined-output

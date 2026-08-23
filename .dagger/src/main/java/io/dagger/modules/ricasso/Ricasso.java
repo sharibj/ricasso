@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import io.dagger.client.exception.DaggerQueryException;
 
-
 /** Ricasso main object */
 @Object
 public class Ricasso {
@@ -37,15 +36,13 @@ public class Ricasso {
   }
 
   @Function(description="Assign a new task to the agentic harness.")
-  public ExecResult task(String prompt)
-    throws InterruptedException, ExecutionException, DaggerQueryException {
+  public Ricasso task(String prompt){
     return append_and_execute(HARNESS_EXEC, prompt);
   }
 
 
   @Function(description="Continue a previous task in the agentic harness.")
-  public ExecResult followup(String prompt)
-    throws InterruptedException, ExecutionException, DaggerQueryException {
+  public Ricasso followup(String prompt){
     return append_and_execute(HARNESS_CONTINUE, prompt);
   }
 
@@ -59,181 +56,8 @@ public class Ricasso {
     return this.container.directory(WORKING_DIR);
   }
 
-@Function(description = "Orchestrate a coding task to completion.")
-public Ricasso ask(String prompt)
-    throws InterruptedException, ExecutionException, DaggerQueryException {
-
-  final int MAX_ITERATIONS = 20;
-
-  LLM llm = dag()
-      .llm()
-      .withSystemPrompt("""
-          You are the supervisor of an autonomous coding harness.
-
-          You DO NOT modify files yourself.
-
-          Instead, you decide what instruction should be sent to the coding
-          harness next.
-
-          You must respond using EXACTLY one of these formats:
-
-          TASK
-          <instruction>
-
-          FOLLOWUP
-          <instruction>
-
-          DONE
-          <short final summary>
-
-          Rules:
-
-          - TASK is used exactly once to start the job.
-          - FOLLOWUP is used after TASK to inspect, correct, test, verify,
-            or finish the existing work.
-          - DONE means the coding task is fully complete.
-          - Never output anything before the command word.
-          - Do not use Markdown fences around the command.
-          - Do not claim completion unless the harness output gives sufficient
-            evidence that the requested work is complete.
-          - If tests/builds/checks can reasonably be run, require the harness
-            to run them before DONE.
-          - If the harness reports errors, issue a FOLLOWUP telling it to
-            diagnose and fix them.
-          - Keep follow-up instructions concrete and actionable.
-          """)
-      .withPrompt("""
-          User coding job:
-
-          %s
-
-          Decide the first harness action now.
-          """.formatted(prompt));
-
-  boolean taskStarted = false;
-
-  for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-
-    /*
-     * Run one supervisor turn.
-     *
-     * We don't give this LLM Dagger tools. Its only job is to decide
-     * what Java should do next.
-     */
-    llm = llm.loop();
-
-    String reply = llm.lastReply().trim();
-
-    System.out.println(
-        "[ricasso supervisor iteration " + (iteration + 1) + "]\n" + reply);
-
-    if (reply.startsWith("DONE")) {
-      return this;
-    }
-
-    ExecResult execResult;
-
-    if (reply.startsWith("TASK")) {
-
-      if (taskStarted) {
-        // Don't accidentally restart the harness conversation.
-        llm = llm.withPrompt("""
-            Invalid supervisor action.
-
-            TASK has already been executed for this job.
-            You must now use FOLLOWUP or DONE.
-            """);
-        continue;
-      }
-
-      String harnessPrompt = extractCommandBody(reply, "TASK");
-
-      execResult = append_and_execute(
-          HARNESS_EXEC,
-          harnessPrompt);
-
-      taskStarted = true;
-
-    } else if (reply.startsWith("FOLLOWUP")) {
-
-      if (!taskStarted) {
-        llm = llm.withPrompt("""
-            Invalid supervisor action.
-
-            The harness has not been started yet.
-            Your next action must be TASK.
-            """);
-        continue;
-      }
-
-      String harnessPrompt = extractCommandBody(reply, "FOLLOWUP");
-
-      execResult = append_and_execute(
-          HARNESS_CONTINUE,
-          harnessPrompt);
-
-    } else {
-
-      /*
-       * The model violated our tiny protocol.
-       * Don't crash — tell it to correct itself.
-       */
-      llm = llm.withPrompt("""
-          Your previous response did not follow the required protocol.
-
-          Respond with exactly one of:
-
-          TASK
-          <instruction>
-
-          FOLLOWUP
-          <instruction>
-
-          DONE
-          <summary>
-          """);
-
-      continue;
-    }
-
-    /*
-     * This is the important part:
-     *
-     * append_and_execute() has already:
-     *   1. executed pi
-     *   2. updated this.container
-     *   3. captured stdout/stderr
-     *
-     * Now give the textual result back to the supervisor.
-     */
-    String harnessOutput = execResult.output();
-
-    llm = llm.withPrompt("""
-        The coding harness completed the requested action.
-
-        Harness output:
-
-        ----- HARNESS OUTPUT -----
-        %s
-        ----- END HARNESS OUTPUT -----
-
-        Evaluate the result against the original user job.
-
-        If anything remains to implement, fix, test, inspect, or verify,
-        respond with FOLLOWUP and the exact instruction to send to the
-        harness.
-
-        If the job is fully implemented and appropriately verified,
-        respond with DONE and a short summary.
-        """.formatted(harnessOutput));
-  }
-
-  throw new IllegalStateException(
-      "Ricasso orchestration exceeded " + MAX_ITERATIONS + " iterations");
-}
-
 @Function(description = "Orchestrate a coding task to full completion using the agentic harness.")
-public Ricasso ask2(String prompt)
+public Ricasso ask(String prompt)
     throws InterruptedException, ExecutionException, DaggerQueryException {
 
   Env env = dag()
@@ -350,8 +174,7 @@ public Ricasso ask2(String prompt)
   return this;
 }
 
-  private ExecResult append_and_execute(List<String> command, String prompt)
-    throws InterruptedException, ExecutionException, DaggerQueryException  {
+  private Ricasso append_and_execute(List<String> command, String prompt) {
      List<String> execCommand = new ArrayList<>(command);
      String scopedPrompt = """
       WORKSPACE CONSTRAINT
@@ -376,18 +199,6 @@ public Ricasso ask2(String prompt)
     this.container = this
     .container
     .withExec(execCommand);
-    
-    return new ExecResult(this.container, this.container().combinedOutput());
+    return this;
   }
-  private String extractCommandBody(String reply, String command) {
-    String body = reply.substring(command.length()).trim();
-    
-    if (body.isBlank()) {
-      throw new IllegalArgumentException(
-              "Supervisor returned " + command + " without an instruction");
-    }
-    
-    return body;
-  }
-  
 }
