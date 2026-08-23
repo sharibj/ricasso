@@ -46,7 +46,9 @@ public class Ricasso {
     return base.directory(Constants.WORKING_DIR);
   }
 
-  @Function(description = "Orchestrate a coding task to full completion using the agentic harness.")
+  // Disabled: orchestration is now driven externally by a coding harness via MCP
+  // (see the ricasso-orchestrator skill). Re-add @Function to expose it again.
+  // @Function(description = "Orchestrate a coding task to full completion using the agentic harness.")
   public Container ask(String prompt, @DefaultPath(".") Directory sourcePath, @Default(".wt") String wtPath)
       throws InterruptedException, ExecutionException, DaggerQueryException {
 
@@ -87,11 +89,4 @@ public class Ricasso {
     source(container).export(wtPath + "/" + exportName);
     return container;
   }
-
-  @Function
-public Container next(Container base) {
-  return base.withNewFile(
-      Constants.WORKING_DIR+"/" + System.nanoTime(),
-      "hello");
-}
 }

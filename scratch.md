@@ -30,3 +30,13 @@ To upgrade, see https://docs.dagger.io/install
 https://github.com/dagger/dagger/releases/tag/v0.21.7
 ➜  ricasso-python
 
+
+
+{
+    "mcpServers": {
+      "ricasso": {
+        "command": "dagger",
+        "args": ["mcp", "-m", "/Users/i768344/SAPDevelop/pet/ricasso", "--stdio"]
+      }
+    }
+  }
