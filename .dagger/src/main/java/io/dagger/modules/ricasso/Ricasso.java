@@ -24,7 +24,7 @@ public class Ricasso {
   private static final String WORKING_DIR = "/app";
 
   public Ricasso() {
-    this.container = this.container = dag().container().from("jafarisharib/pi-harness");
+    this.container = dag().container().from("jafarisharib/pi-harness");
   }
 
   @Function(description="Initialise the container with source directory.")
