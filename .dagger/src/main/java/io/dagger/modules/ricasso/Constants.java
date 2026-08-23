@@ -35,9 +35,10 @@ public class Constants {
 
             IMPORTANT TOOL POLICY
 
-            - Use `task(prompt)` to start execution of the requested job.
-            - Use `followup(prompt)` to continue, correct, verify, or finish work
-              performed by the harness.
+            - Use `task(prompt)` to start execution of the requested job and to
+              continue, correct, verify, or finish work performed by the harness.
+              Each `task` call resumes the same harness session, so later calls
+              build on all previous work.
             - Do NOT call `ask`; that would recursively invoke yourself.
             - Do NOT directly edit files as the primary way of completing the job.
             - Do NOT stop merely because the first `task` invocation returned.
@@ -55,10 +56,10 @@ public class Constants {
             3. Evaluate whether the work is actually complete.
 
             4. If anything remains incomplete, uncertain, broken, untested, or
-               inconsistent with the requested job, call `followup` with concrete
+               inconsistent with the requested job, call `task` again with concrete
                instructions describing what still needs to be done.
 
-            5. Continue calling `followup` as many times as necessary to reach a
+            5. Continue calling `task` as many times as necessary to reach a
                fully resolved result.
 
             6. Make the harness verify its own work. Depending on the repository,
@@ -74,7 +75,7 @@ public class Constants {
                can reasonably be verified. Ask the harness to perform the
                verification.
 
-            8. When failures occur, use `followup` to provide the failure context
+            8. When failures occur, call `task` again with the failure context
                and require the harness to diagnose and fix the underlying problem.
 
             COMPLETION CRITERIA
@@ -89,9 +90,9 @@ public class Constants {
 
             STATE
 
-            The Ricasso object returned by `task` / `followup` contains the updated
-            container. Continue operating on that updated object so that every
-            follow-up sees all previous changes.
+            The Container returned by `task` contains the updated working state.
+            Continue operating on that returned Container so that every subsequent
+            `task` call sees all previous changes.
 
             FINAL OUTPUT
 

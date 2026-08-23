@@ -83,15 +83,15 @@ public class Ricasso {
         .loop();
 
     Container container = llm.env().output("result").asContainer();
-    String containerId = container.id().toString();
-    source(container).export(wtPath+"/"+containerId);
+    String exportName = Long.toHexString(System.currentTimeMillis());
+    source(container).export(wtPath + "/" + exportName);
     return container;
   }
 
   @Function
 public Container next(Container base) {
   return base.withNewFile(
-      "/tmp/" + System.nanoTime(),
+      Constants.WORKING_DIR+"/" + System.nanoTime(),
       "hello");
 }
 }
