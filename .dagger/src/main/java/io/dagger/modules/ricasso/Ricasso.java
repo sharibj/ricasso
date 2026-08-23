@@ -6,8 +6,10 @@ import io.dagger.client.Container;
 import io.dagger.client.Directory;
 import io.dagger.client.Env;
 import io.dagger.client.LLM;
+import io.dagger.module.annotation.DefaultPath;
 import io.dagger.module.annotation.Function;
 import io.dagger.module.annotation.Object;
+import io.dagger.module.annotation.Default;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,44 +20,34 @@ import io.dagger.client.exception.DaggerQueryException;
 @Object
 public class Ricasso {
 
-  public Container container;
-
   public Ricasso() {
-    this.container = dag().container().from(Constants.BASE_IMAGE);
   }
 
   @Function(description = "Initialise the container with source directory.")
-  public Ricasso init(Directory sourcePath) {
-    this.container = this.container
+  public Container init(@DefaultPath(".") Directory sourcePath) {
+    return dag().container().from(Constants.BASE_IMAGE)
         .withMountedDirectory(Constants.WORKING_DIR, sourcePath)
         .withWorkdir(Constants.WORKING_DIR);
-    return this;
   }
 
   @Function(description = "Assign a new or followup task to the agentic harness.")
-  public Ricasso task(String prompt) {
+  public Container task(Container base, String prompt) {
     List<String> execCommand = new ArrayList<>(Constants.HARNESS_EXEC);
     String scopedPrompt = Constants.TASK_PROMPT.formatted(Constants.WORKING_DIR, prompt);
 
     execCommand.add(scopedPrompt);
 
-    this.container = this.container
+    return base
         .withExec(execCommand);
-    return this;
-  }
-
-  @Function(description = "Return underlying base container.")
-  public Container base() {
-    return this.container;
   }
 
   @Function(description = "Return the modified source directory.")
-  public Directory source() {
-    return this.container.directory(Constants.WORKING_DIR);
+  public Directory source(Container base) {
+    return base.directory(Constants.WORKING_DIR);
   }
 
   @Function(description = "Orchestrate a coding task to full completion using the agentic harness.")
-  public Ricasso ask(String prompt)
+  public Container ask(String prompt, @DefaultPath(".") Directory sourcePath, @Default(".wt") String wtPath)
       throws InterruptedException, ExecutionException, DaggerQueryException {
 
     Env env = dag()
@@ -71,7 +63,7 @@ public class Ricasso {
             "Path to the working directory")
         .withContainerInput(
             "base",
-            this.container,
+            this.init(sourcePath),
             "The initial working container")
         .withContainerOutput(
             "result",
@@ -80,19 +72,26 @@ public class Ricasso {
     LLM llm = dag()
         .llm()
         .withEnv(env)
-
         // Orchestrator role / system-like instructions.
-        .withPrompt(Constants.ASK_SYSTEM_PROMPT)
-
-        // Actual job.
+        .withSystemPrompt(Constants.ASK_SYSTEM_PROMPT)
         .withPrompt("""
-            Job to complete:
-
-            $job
-            """)
+          The requested job is: 
+          "
+          $job.
+          "
+          """)
         .loop();
 
-    this.container = llm.env().output("result").asContainer();
-    return this;
+    Container container = llm.env().output("result").asContainer();
+    String containerId = container.id().toString();
+    source(container).export(wtPath+"/"+containerId);
+    return container;
   }
+
+  @Function
+public Container next(Container base) {
+  return base.withNewFile(
+      "/tmp/" + System.nanoTime(),
+      "hello");
+}
 }
